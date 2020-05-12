@@ -55,6 +55,20 @@ npm run dev
 Download and install Java
 https://www.oracle.com/java/technologies/javase-jdk8-downloads.html
 
+## Adding Routes to the App
+
+1. Decide what URL the new app route is and put it in [src/app/routing/routes.ts](.src/app/routing/routes.ts). Please try to use meaningful variable names for the route, they don't need to be exactly the same as the URL.
+
+2. Define the React routes in [src/App.jsx](./src/App.jsx) using our `<AppRoute />` component. It's a wrapper for the React `<Route />` component, but it is aware of authentication and authorization concepts.
+
+3. Set appropriate permissions for that new route in [src/app/routing/RoutePermissions.ts](./src/app/routing/RoutePermissions.ts). The set of permissions we have defined so far are here: [src/app/model/permissions/Permissions.ts](./src/app/model/permissions/Permissions.ts). 
+
+If you're not sure or if you don't see something that matches your usecase of your new route, please bring it up for discussion in Slack (**#resilience-app** or **#resilience-dev** channel). It's not always clear what should be a permission and what should not be, however, the rule of thumb is that we focus on [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete).
+
+_Note:_ A route will be **inaccessible** (404 Page Not Found) if you:
+- don't define the route in [src/app/routing/routes.ts](.src/app/routing/routes.ts)
+- don't define any permissions for the route in [src/app/routing/RoutePermissions.ts](./src/app/routing/RoutePermissions.ts). We consider the route as not ready because it hasn't been configured.
+
 ## Test Data
 
 When running the app locally, you can test the phone verification sign-up flow by entering any of the phone number / verification code combinations listed below (the leading "1" should be filled in for you):
