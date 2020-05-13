@@ -4,6 +4,7 @@ import ROUTE_PERMISSIONS from "../RoutePermissions";
 import { IPermissionSet, IRoutePermissions } from "./utils";
 import { PERMISSIONS } from "../../model";
 import userPermissionsService, {
+  USER_ROLES,
   UserPermissionsService,
 } from "../../model/permissions/UserPermissionsService";
 
@@ -11,10 +12,12 @@ export class RoutingService {
   private _auth: AuthState = {};
 
   private _isAuthenticated(): boolean {
+    console.log("AUTH", this._auth);
     return isLoaded(this._auth) && !isEmpty(this._auth);
   }
 
   private _verifyPermissions(
+    userPermissions: PERMISSIONS[],
     requiredPermissions: IPermissionSet,
     route: IRoute
   ): IRouteEntitlement[] {
@@ -71,17 +74,33 @@ export class RoutingService {
 
   public canAccessRoute(route: IRoute): IRouteEntitlement {
     const requiredPermissions: IPermissionSet = this._routePermissions[route] as IPermissionSet;
-    const verifyPermissions: IRouteEntitlement[] = this._verifyPermissions(
-      requiredPermissions,
-      route
-    );
-    const violation: IRouteEntitlement | undefined = verifyPermissions.find(
-      (routeEntitlement: IRouteEntitlement) => !routeEntitlement.permissionGranted
-    );
-    const permissionGranted: boolean = violation === undefined;
+
+    this._userPermissions
+      .useAuth(this._auth)
+      .getUserEntitlements()
+      .then((userPermissions: PERMISSIONS[]) => {
+        console.log("USER PERMISSIONS", userPermissions);
+        console.log("REQUIRED PERMISSIONS", requiredPermissions);
+
+        const verifyPermissions: IRouteEntitlement[] = this._verifyPermissions(
+          userPermissions,
+          requiredPermissions,
+          route
+        );
+        console.log("Verification result:", verifyPermissions);
+        const violation: IRouteEntitlement | undefined = verifyPermissions.find(
+          (routeEntitlement: IRouteEntitlement) => !routeEntitlement.permissionGranted
+        );
+        const permissionGranted: boolean = violation === undefined;
+        const result: IRouteEntitlement = {
+          route: permissionGranted ? route : (violation as IRouteEntitlement).route,
+          permissionGranted,
+        };
+        console.log(result);
+      });
     return {
-      route: permissionGranted ? route : (violation as IRouteEntitlement).route,
-      permissionGranted,
+      route: route,
+      permissionGranted: true,
     };
   }
 }

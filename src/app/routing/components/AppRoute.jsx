@@ -9,6 +9,7 @@ function AppRoute({ children, component, ...rest }) {
   const auth = useSelector((state) => state.firebase.auth);
   const handleRender = ({ location }) => {
     const routeAccess = RoutingService.useAuth(auth).canAccessRoute(location.pathname);
+    console.log(location.pathname, routeAccess);
     if (routeAccess.permissionGranted) {
       return component ? React.createElement(component, rest) : children;
     } else {
